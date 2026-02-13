@@ -1,0 +1,486 @@
+-- سكربت الهروب من لافا
+
+local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+
+
+local MainGui = Instance.new("ScreenGui")
+MainGui.Name = "Fares_Chimera_v7"
+MainGui.ResetOnSpawn = false
+MainGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 180, 0, 280) 
+MainFrame.Position = UDim2.new(0.5, -150, 0.5, -240)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 28, 35)
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = MainGui
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
+local stroke = Instance.new("UIStroke", MainFrame); stroke.Color = Color3.fromRGB(0, 120, 255); stroke.Thickness = 2
+local aspectRatio = Instance.new("UIAspectRatioConstraint", MainFrame); aspectRatio.AspectRatio = 300 / 480
+
+local Header = Instance.new("Frame", MainFrame)
+Header.Size = UDim2.new(1, 0, 0, 40)
+Header.BackgroundColor3 = Color3.fromRGB(35, 38, 48)
+Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 10)
+
+local Title = Instance.new("TextLabel", Header)
+Title.Size = UDim2.new(1, 0, 1, 0)
+Title.BackgroundTransparency = 1
+Title.Text = " SurviveLava For Brainrots | By Faresv2"
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 8.5
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Position = UDim2.new(0, 15, 0, 0)
+
+local ScrollFrame = Instance.new("ScrollingFrame", MainFrame)
+ScrollFrame.Size = UDim2.new(1, -20, 1, -50)
+ScrollFrame.Position = UDim2.new(0, 10, 0, 45)
+ScrollFrame.BackgroundTransparency = 1
+ScrollFrame.BorderSizePixel = 0
+ScrollFrame.ScrollBarThickness = 4
+ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+
+local ListLayout = Instance.new("UIListLayout", ScrollFrame)
+ListLayout.Padding = UDim.new(0, 8)
+ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+
+
+
+local VirtualInputManager = game:GetService("VirtualInputManager")
+
+local function holdE(seconds)
+    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+    task.wait(seconds)
+    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+end
+
+
+local function createSection(title)
+    local label = Instance.new("TextLabel", ScrollFrame)
+    label.Size = UDim2.new(1, 0, 0, 25)
+    label.BackgroundTransparency = 1
+    label.Text = "— " .. title .. " —"
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 16
+    label.TextColor3 = Color3.fromRGB(0, 120, 255)
+    return label
+end
+
+local function createToggle(parent, name, callback)
+    local frame = Instance.new("Frame", parent)
+    frame.Size = UDim2.new(1, 0, 0, 30)
+    frame.BackgroundTransparency = 1
+    local label = Instance.new("TextLabel", frame)
+    label.Size = UDim2.new(0.7, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = name
+    label.Font = Enum.Font.Gotham
+    label.TextSize = 14
+    label.TextColor3 = Color3.new(1, 1, 1)
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    local button = Instance.new("TextButton", frame)
+    button.Size = UDim2.new(0.25, 0, 1, 0)
+    button.Position = UDim2.new(0.75, 0, 0, 0)
+    button.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+    button.Text = "OFF"
+    button.Font = Enum.Font.GothamBold
+    button.TextSize = 12
+    button.TextColor3 = Color3.new(1, 1, 1)
+    Instance.new("UICorner", button).CornerRadius = UDim.new(0, 5)
+    local enabled = false
+    button.MouseButton1Click:Connect(function()
+        enabled = not enabled
+        button.Text = enabled and "ON" or "OFF"
+        button.BackgroundColor3 = enabled and Color3.fromRGB(0, 150, 80) or Color3.fromRGB(80, 80, 80)
+        if callback then
+            callback(enabled)
+        end
+    end)
+    return frame, button
+end
+
+local function createSlider(parent, name, min, max, start, callback)
+    local frame = Instance.new("Frame", parent)
+    frame.Size = UDim2.new(1, 0, 0, 50)
+    frame.BackgroundTransparency = 1
+    local label = Instance.new("TextLabel", frame)
+    label.Size = UDim2.new(1, 0, 0, 20)
+    label.BackgroundTransparency = 1
+    label.Font = Enum.Font.Gotham
+    label.TextSize = 14
+    label.TextColor3 = Color3.new(1, 1, 1)
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    local sliderFrame = Instance.new("Frame", frame)
+    sliderFrame.Size = UDim2.new(1, 0, 0, 20)
+    sliderFrame.Position = UDim2.new(0, 0, 0, 25)
+    sliderFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+    Instance.new("UICorner", sliderFrame).CornerRadius = UDim.new(0, 5)
+    local fill = Instance.new("Frame", sliderFrame)
+    fill.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+    Instance.new("UICorner", fill).CornerRadius = UDim.new(0, 5)
+    local handle = Instance.new("TextButton", sliderFrame)
+    handle.Size = UDim2.new(0, 10, 1, 4)
+    handle.Position = UDim2.new(0, -5, 0.5, -12)
+    handle.BackgroundColor3 = Color3.new(1, 1, 1)
+    handle.BorderSizePixel = 0
+    Instance.new("UICorner", handle).CornerRadius = UDim.new(1, 0)
+    local value = start
+    local function updateSlider(inputPos)
+        local relativeX = math.clamp((inputPos.X - sliderFrame.AbsolutePosition.X) / sliderFrame.AbsoluteSize.X, 0, 1)
+        value = math.floor(min + (max - min) * relativeX)
+        fill.Size = UDim2.new(relativeX, 0, 1, 0)
+        handle.Position = UDim2.new(relativeX, -5, 0.5, -12)
+        label.Text = name .. ": " .. value
+        if callback then
+            callback(value)
+        end
+    end
+    label.Text = name .. ": " .. value
+    updateSlider({X = sliderFrame.AbsolutePosition.X + (sliderFrame.AbsoluteSize.X * ((start - min) / (max - min)))})
+    handle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            local moveConn, endConn
+            moveConn = UserInputService.InputChanged:Connect(function(moveInput)
+                if moveInput.UserInputType == Enum.UserInputType.MouseMovement or moveInput.UserInputType == Enum.UserInputType.Touch then
+                    updateSlider(moveInput.Position)
+                end
+            end)
+            endConn = UserInputService.InputEnded:Connect(function(endInput)
+                if endInput.UserInputType == Enum.UserInputType.MouseButton1 or endInput.UserInputType == Enum.UserInputType.Touch then
+                    moveConn:Disconnect()
+                    endConn:Disconnect()
+                end
+            end)
+        end
+    end)
+    return frame
+end
+
+local function createActionButton(parent, name, callback)
+    local button = Instance.new("TextButton", parent)
+    button.Size = UDim2.new(1, 0, 0, 35)
+    button.BackgroundColor3 = Color3.fromRGB(50, 55, 70)
+    button.Text = name
+    button.Font = Enum.Font.GothamBold
+    button.TextSize = 14
+    button.TextColor3 = Color3.new(1, 1, 1)
+    Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
+    button.MouseButton1Click:Connect(callback)
+    return button
+end
+
+
+
+local function doRebirth()
+    pcall(function()
+        ReplicatedStorage.Events.Rebirth:InvokeServer("Rebirth")
+    end)
+end
+
+createToggle(ScrollFrame, "Free Vip", function(state)
+    if state then
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v.Name == "VIPDoors" or v.Name == "VIPDoor" then
+                pcall(function()
+                    v:Destroy()
+                end)
+            end
+        end
+    end
+end)
+
+
+
+createSection("Local Movement").Parent = ScrollFrame
+local speedValue = 16; local jumpPowerValue = 50; local infJumpActive = false; local infJumpConn
+createToggle(ScrollFrame, "Infinite Jump", function(state) infJumpActive = state; if infJumpActive then infJumpConn = UserInputService.JumpRequest:Connect(function() if infJumpActive and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping) end end) elseif infJumpConn then infJumpConn:Disconnect(); infJumpConn = nil end end)
+createToggle(ScrollFrame, "Jump Power", function(state) local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid"); if humanoid then if state then humanoid.JumpPower = jumpPowerValue else humanoid.JumpPower = 50 end end end)
+createSlider(ScrollFrame, "Jump Power", 50, 1000, 50, function(val) jumpPowerValue = val end)
+createToggle(ScrollFrame, "Walk Speed", function(state) local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid"); if humanoid then if state then humanoid.WalkSpeed = speedValue else humanoid.WalkSpeed = 16 end end end)
+createSlider(ScrollFrame, "Walk Speed", 16, 1000, 16, function(val) speedValue = val end)
+local note = Instance.new("TextLabel", ScrollFrame); note.Size = UDim2.new(1, 0, 0, 40); note.BackgroundTransparency = 1; note.Text = "ملاحظة: أدوات الحركة (السرعة والنط) مش بتاثر علي جمع Brainrots أو Rebirth. و لو لاحظت السرعة مو بتطبق جرب on/offمن جديد"; note.Font = Enum.Font.SourceSansItalic; note.TextSize = 12; note.TextColor3 = Color3.fromRGB(150, 150, 150); note.TextWrapped = true
+
+createActionButton(ScrollFrame, "Fly", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/ook314745-svg/fly/refs/heads/main/fly"))()
+end)
+
+local autoRebirthActive = false
+local autoBuySpeedActive = false
+
+
+createSection("Base Management").Parent = ScrollFrame
+local autoFarmTeleportActive = false
+local autoUpgradeRemoteActive = false
+
+local function getHomePlot()
+    local plotName = LocalPlayer:GetAttribute("Plot")
+    if plotName then
+        return workspace.GameFolder.Plots:FindFirstChild(plotName)
+    end
+    return nil
+end
+
+createActionButton(ScrollFrame, "Back to My base", function()
+    local myPlot = getHomePlot()
+    if myPlot and LocalPlayer.Character then
+        LocalPlayer.Character:PivotTo(myPlot:GetPivot() * CFrame.new(0, 4, -10) * CFrame.fromOrientation(0, math.pi, 0))
+    end
+end)
+
+createActionButton(ScrollFrame, "Upgrade base", function()
+    ReplicatedStorage.Events.Upgrade:InvokeServer()
+end)
+
+
+createToggle(ScrollFrame, "Auto Collect", function(state)
+    autoFarmTeleportActive = state
+    if autoFarmTeleportActive then
+        task.spawn(function()
+            while autoFarmTeleportActive do
+                local myPlot = getHomePlot()
+                if myPlot then
+                    for i = 1, 30 do
+                        if not autoFarmTeleportActive then break end
+                        local place = myPlot.Places:FindFirstChild(tostring(i))
+                        if place and place:FindFirstChild("Claim") then
+                            local claimPart = place.Claim
+                            local rootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                            if rootPart then
+                                rootPart.CFrame = claimPart.CFrame * CFrame.new(0, 5, 0)
+                                task.wait(0.3)
+                            end
+                        end
+                    end
+                end
+                task.wait(1)
+            end
+        end)
+    end
+end)
+
+
+createToggle(ScrollFrame, "Auto Upgrade", function(state)
+    autoUpgradeRemoteActive = state
+    if autoUpgradeRemoteActive then
+        task.spawn(function()
+            while autoUpgradeRemoteActive do
+                for i = 1, 30 do
+                    if not autoUpgradeRemoteActive then break end
+                    ReplicatedStorage.Events.Upgrade:InvokeServer(i)
+                    task.wait(0.1)
+                end
+                task.wait(1)
+            end
+        end)
+    end
+end)
+
+createToggle(ScrollFrame, "Auto Rebirth", function(state)
+    autoRebirthActive = state
+    if autoRebirthActive then
+        task.spawn(function()
+            while autoRebirthActive do
+                doRebirth()
+                task.wait(0.5)
+            end
+        end)
+    end
+end)
+
+createToggle(ScrollFrame, "Auto Buy Speed", function(state)
+    autoBuySpeedActive = state
+    if autoBuySpeedActive then
+        task.spawn(function()
+            while autoBuySpeedActive do
+                pcall(function()
+                    ReplicatedStorage.Events.Speed:InvokeServer("Speed", 10)
+                end)
+                task.wait(0.5) 
+            end
+        end)
+    end
+end)
+
+
+createSection("AUTOget Section").Parent = ScrollFrame
+local celestialHunterActive = false; local celestialWatcherConn
+createActionButton(ScrollFrame, "TP to Celestial", function()
+    local celestialFolder = workspace.GameFolder.Brainrots:FindFirstChild("Celestial")
+    if celestialFolder and #celestialFolder:GetChildren() > 0 then
+        local obj = celestialFolder:GetChildren()[1]
+        local root = obj:FindFirstChildWhichIsA("BasePart") or obj.PrimaryPart
+        if root and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            LocalPlayer.Character.HumanoidRootPart.CFrame = root.CFrame * CFrame.new(0, 5, 0)
+        end
+    end
+end)
+createToggle(ScrollFrame, "Auto Get Celestial", function(state)
+    celestialHunterActive = state
+    if celestialHunterActive then
+        local celestialFolder = workspace.GameFolder.Brainrots:FindFirstChild("Celestial")
+        if not celestialFolder then return end
+
+        local function hunt(celestial)
+            if not celestialHunterActive or not celestial.Parent then return end
+
+            local rootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if not rootPart then return end
+
+            local originalCFrame = rootPart.CFrame
+            local targetPart = celestial:FindFirstChildWhichIsA("BasePart") or celestial.PrimaryPart
+            if not targetPart then return end
+
+            rootPart.CFrame = targetPart.CFrame * CFrame.new(0, 5, 0)
+            task.wait(0.1)
+
+            local prompt = celestial:FindFirstChildWhichIsA("ProximityPrompt", true)
+            if prompt then
+                holdE(prompt.HoldDuration or 1.5)
+            end
+
+            for i = 1, 20 do
+                if not celestial.Parent then break end
+                task.wait(0.1)
+            end
+
+            task.wait(0.2)
+            rootPart.CFrame = originalCFrame
+        end
+
+        celestialWatcherConn = celestialFolder.ChildAdded:Connect(hunt)
+
+        for _, celestial in ipairs(celestialFolder:GetChildren()) do
+            task.spawn(hunt, celestial)
+        end
+
+    elseif celestialWatcherConn then
+        celestialWatcherConn:Disconnect()
+        celestialWatcherConn = nil
+    end
+end)
+
+
+createActionButton(ScrollFrame, "TP to Secret", function()
+    local secretFolder = workspace.GameFolder.Brainrots:FindFirstChild("Secret")
+    if secretFolder and #secretFolder:GetChildren() > 0 then
+        local obj = secretFolder:GetChildren()[1]
+        local root = obj:FindFirstChildWhichIsA("BasePart") or obj.PrimaryPart
+        if root and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            LocalPlayer.Character.HumanoidRootPart.CFrame = root.CFrame * CFrame.new(0, 5, 0)
+        end
+    end
+end)
+local secretHunterActive = false
+local secretWatcherConn
+
+createToggle(ScrollFrame, "Auto Get Secret", function(state)
+    secretHunterActive = state
+    if secretHunterActive then
+        local secretFolder = workspace.GameFolder.Brainrots:FindFirstChild("Secret")
+        if not secretFolder then return end
+
+        local function hunt(secret)
+            if not secretHunterActive or not secret.Parent then return end
+
+            local rootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if not rootPart then return end
+
+            local originalCFrame = rootPart.CFrame
+            local targetPart = secret:FindFirstChildWhichIsA("BasePart") or secret.PrimaryPart
+            if not targetPart then return end
+
+            rootPart.CFrame = targetPart.CFrame * CFrame.new(0, 5, 0)
+            task.wait(0.1)
+
+ local prompt = secret:FindFirstChildWhichIsA("ProximityPrompt", true)
+if prompt then
+    holdE(prompt.HoldDuration or 1.5)
+end
+
+            task.wait(0.2)
+            rootPart.CFrame = originalCFrame
+        end
+
+        secretWatcherConn = secretFolder.ChildAdded:Connect(hunt)
+
+        for _, secret in ipairs(secretFolder:GetChildren()) do
+            task.spawn(hunt, secret)
+        end
+
+    elseif secretWatcherConn then
+        secretWatcherConn:Disconnect()
+        secretWatcherConn = nil
+    end
+end)
+
+createSection("Godly Section").Parent = ScrollFrame
+
+createActionButton(ScrollFrame, "TP to Godly", function()
+    local godlyFolder = workspace.GameFolder.Brainrots:FindFirstChild("Godly")
+    if godlyFolder and #godlyFolder:GetChildren() > 0 then
+        local obj = godlyFolder:GetChildren()[1]
+        local root = obj:FindFirstChildWhichIsA("BasePart") or obj.PrimaryPart
+        if root and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            LocalPlayer.Character.HumanoidRootPart.CFrame = root.CFrame * CFrame.new(0, 5, 0)
+        end
+    end
+end)
+
+local godlyHunterActive = false
+local godlyWatcherConn
+
+createToggle(ScrollFrame, "Auto Get Godly", function(state)
+    godlyHunterActive = state
+    if godlyHunterActive then
+        local godlyFolder = workspace.GameFolder.Brainrots:FindFirstChild("Godly")
+        if not godlyFolder then return end
+
+        local function hunt(godly)
+            if not godlyHunterActive or not godly.Parent then return end
+
+            local rootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if not rootPart then return end
+
+            local originalCFrame = rootPart.CFrame
+            local targetPart = godly:FindFirstChildWhichIsA("BasePart") or godly.PrimaryPart
+            if not targetPart then return end
+
+            rootPart.CFrame = targetPart.CFrame * CFrame.new(0, 5, 0)
+            task.wait(0.1)
+
+            local prompt = godly:FindFirstChildWhichIsA("ProximityPrompt", true)
+            if prompt then
+                holdE(prompt.HoldDuration or 1.5)
+            end
+
+            for i = 1, 20 do
+                if not godly.Parent then break end
+                task.wait(0.1)
+            end
+
+            task.wait(0.2)
+            rootPart.CFrame = originalCFrame
+        end
+
+        godlyWatcherConn = godlyFolder.ChildAdded:Connect(hunt)
+
+        for _, godly in ipairs(godlyFolder:GetChildren()) do
+            task.spawn(hunt, godly)
+        end
+
+    elseif godlyWatcherConn then
+        godlyWatcherConn:Disconnect()
+        godlyWatcherConn = nil
+    end
+end)
+
+
+task.wait(0.5)
+ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 20)
