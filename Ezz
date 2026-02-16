@@ -31,9 +31,9 @@ Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 10)
 local Title = Instance.new("TextLabel", Header)
 Title.Size = UDim2.new(1, 0, 1, 0)
 Title.BackgroundTransparency = 1
-Title.Text = " SurviveLava For Brainrots | By Faresv2"
+Title.Text = " SurviveLava For Brainrots | By Faresv3"
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 8.5
+Title.TextSize = 9.2
 Title.TextColor3 = Color3.new(1, 1, 1)
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Position = UDim2.new(0, 15, 0, 0)
@@ -206,6 +206,137 @@ createSlider(ScrollFrame, "Jump Power", 50, 1000, 50, function(val) jumpPowerVal
 createToggle(ScrollFrame, "Walk Speed", function(state) local humanoid = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid"); if humanoid then if state then humanoid.WalkSpeed = speedValue else humanoid.WalkSpeed = 16 end end end)
 createSlider(ScrollFrame, "Walk Speed", 16, 1000, 16, function(val) speedValue = val end)
 local note = Instance.new("TextLabel", ScrollFrame); note.Size = UDim2.new(1, 0, 0, 40); note.BackgroundTransparency = 1; note.Text = "ملاحظة: أدوات الحركة (السرعة والنط) مش بتاثر علي جمع Brainrots أو Rebirth. و لو لاحظت السرعة مو بتطبق جرب on/offمن جديد"; note.Font = Enum.Font.SourceSansItalic; note.TextSize = 12; note.TextColor3 = Color3.fromRGB(150, 150, 150); note.TextWrapped = true
+
+
+createActionButton(ScrollFrame, "Remove Lava (حقيقي) ", function()
+    
+
+local player = game.Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local humanoid = char:WaitForChild("Humanoid")
+
+local god = false
+local healthConn
+local lavaConn
+
+
+local function isLava(obj)
+    if obj.Name then
+        return string.find(string.lower(obj.Name), "lava") ~= nil
+    end
+    return false
+end
+
+local function removeLava(obj)
+    pcall(function()
+        obj:Destroy()
+    end)
+end
+
+local function scanAndRemoveLava()
+    for _,v in pairs(workspace:GetDescendants()) do
+        if isLava(v) then
+            removeLava(v)
+        end
+    end
+end
+
+local function setup(c)
+    char = c
+    humanoid = c:WaitForChild("Humanoid")
+    if god then
+        startGod()
+    end
+end
+
+function startGod()
+    if healthConn then healthConn:Disconnect() end
+
+    
+    healthConn = humanoid.HealthChanged:Connect(function()
+        if humanoid.Health <= 0 then
+            humanoid.Health = 0
+            humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+        end
+    end)
+
+    
+    scanAndRemoveLava()
+
+    
+    lavaConn = workspace.DescendantAdded:Connect(function(v)
+        if isLava(v) then
+            removeLava(v)
+        end
+    end)
+end
+
+function stopGod()
+    if healthConn then
+        healthConn:Disconnect()
+        healthConn = nil
+    end
+    if lavaConn then
+        lavaConn:Disconnect()
+        lavaConn = nil
+    end
+end
+
+player.CharacterAdded:Connect(function(c)
+    wait(1)
+    setup(c)
+end)
+
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "GodRemoveLavaMatrix"
+gui.Parent = game.CoreGui
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.fromScale(0.4,0.22)
+frame.Position = UDim2.fromScale(0.3,0.4)
+frame.BackgroundColor3 = Color3.fromRGB(5,10,5)
+frame.Active = true
+frame.Draggable = true
+
+local frameStroke = Instance.new("UIStroke", frame)
+frameStroke.Color = Color3.fromRGB(0,255,70)
+frameStroke.Thickness = 2
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1,0,0,40)
+title.Position = UDim2.new(0,0,0,0)
+title.Text = "SCRIPT FARES" 
+title.Font = Enum.Font.Code
+title.TextSize = 18
+title.TextColor3 = Color3.fromRGB(0,255,70)
+title.BackgroundTransparency = 1
+
+local btn = Instance.new("TextButton", frame)
+btn.Size = UDim2.fromScale(0.9,0.6)
+btn.Position = UDim2.fromScale(0.05,0.2)
+btn.TextScaled = true
+btn.Text = "NO LAVA by Fares : OFF"
+btn.BackgroundColor3 = Color3.fromRGB(0,50,0)
+btn.TextColor3 = Color3.fromRGB(0,255,70)
+
+local btnStroke = Instance.new("UIStroke", btn)
+btnStroke.Color = Color3.fromRGB(0,255,120)
+btnStroke.Thickness = 1.5
+
+btn.MouseButton1Click:Connect(function()
+    god = not god
+    if god then
+        btn.Text = "NO LAVA by Fares : ON"
+        btn.BackgroundColor3 = Color3.fromRGB(0,100,0)
+        startGod()
+    else
+        btn.Text = "NO LAVA by Fares : OFF"
+        btn.BackgroundColor3 = Color3.fromRGB(0,50,0)
+        stopGod()
+    end
+end)
+end)
 
 createActionButton(ScrollFrame, "Fly", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/ook314745-svg/fly/refs/heads/main/fly"))()
