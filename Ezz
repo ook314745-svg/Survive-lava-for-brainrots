@@ -1,5 +1,3 @@
--- سكربت الهروب من لافا
-
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
@@ -31,7 +29,7 @@ Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 10)
 local Title = Instance.new("TextLabel", Header)
 Title.Size = UDim2.new(1, 0, 1, 0)
 Title.BackgroundTransparency = 1
-Title.Text = " SurviveLava For Brainrots | By Faresv3"
+Title.Text = " SurviveLava For Brainrots | By Faresv4"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 9.2
 Title.TextColor3 = Color3.new(1, 1, 1)
@@ -50,17 +48,48 @@ local ListLayout = Instance.new("UIListLayout", ScrollFrame)
 ListLayout.Padding = UDim.new(0, 8)
 ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
+local notificationContainer = Instance.new("Frame", MainGui)
+notificationContainer.Size = UDim2.new(0, 250, 1, 0)
+notificationContainer.Position = UDim2.new(1, -270, 0, 0)
+notificationContainer.BackgroundTransparency = 1
+notificationContainer.ZIndex = 100
+local notificationLayout = Instance.new("UIListLayout", notificationContainer)
+notificationLayout.SortOrder = Enum.SortOrder.LayoutOrder
+notificationLayout.Padding = UDim.new(0, 5)
+notificationLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+notificationLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
 
+local function notify(title, text, duration)
+    local notifFrame = Instance.new("Frame", notificationContainer)
+    notifFrame.Size = UDim2.new(1, 0, 0, 50)
+    notifFrame.BackgroundColor3 = Color3.fromRGB(20, 22, 28)
+    notifFrame.BorderSizePixel = 0
+    local notifCorner = Instance.new("UICorner", notifFrame); notifCorner.CornerRadius = UDim.new(0, 6)
+    local notifStroke = Instance.new("UIStroke", notifFrame); notifStroke.Color = Color3.fromRGB(0, 120, 255); notifStroke.Thickness = 1
+    
+    local titleLabel = Instance.new("TextLabel", notifFrame)
+    titleLabel.Size = UDim2.new(1, -10, 0, 20)
+    titleLabel.Position = UDim2.new(0, 5, 0, 5)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.Text = title
+    titleLabel.TextColor3 = Color3.new(1,1,1)
+    titleLabel.TextSize = 14
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 
+    local textLabel = Instance.new("TextLabel", notifFrame)
+    textLabel.Size = UDim2.new(1, -10, 0, 20)
+    textLabel.Position = UDim2.new(0, 5, 0, 25)
+    textLabel.BackgroundTransparency = 1
+    textLabel.Font = Enum.Font.Gotham
+    textLabel.Text = text
+    textLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+    textLabel.TextSize = 12
+    textLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-local VirtualInputManager = game:GetService("VirtualInputManager")
-
-local function holdE(seconds)
-    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-    task.wait(seconds)
-    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+    task.wait(duration or 5)
+    pcall(function() notifFrame:Destroy() end)
 end
-
 
 local function createSection(title)
     local label = Instance.new("TextLabel", ScrollFrame)
@@ -100,7 +129,7 @@ local function createToggle(parent, name, callback)
         button.Text = enabled and "ON" or "OFF"
         button.BackgroundColor3 = enabled and Color3.fromRGB(0, 150, 80) or Color3.fromRGB(80, 80, 80)
         if callback then
-            callback(enabled)
+            callback(enabled, button)
         end
     end)
     return frame, button
@@ -176,8 +205,6 @@ local function createActionButton(parent, name, callback)
     return button
 end
 
-
-
 local function doRebirth()
     pcall(function()
         ReplicatedStorage.Events.Rebirth:InvokeServer("Rebirth")
@@ -196,8 +223,6 @@ createToggle(ScrollFrame, "Free Vip", function(state)
     end
 end)
 
-
-
 createSection("Local Movement").Parent = ScrollFrame
 local speedValue = 16; local jumpPowerValue = 50; local infJumpActive = false; local infJumpConn
 createToggle(ScrollFrame, "Infinite Jump", function(state) infJumpActive = state; if infJumpActive then infJumpConn = UserInputService.JumpRequest:Connect(function() if infJumpActive and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping) end end) elseif infJumpConn then infJumpConn:Disconnect(); infJumpConn = nil end end)
@@ -207,135 +232,27 @@ createToggle(ScrollFrame, "Walk Speed", function(state) local humanoid = LocalPl
 createSlider(ScrollFrame, "Walk Speed", 16, 1000, 16, function(val) speedValue = val end)
 local note = Instance.new("TextLabel", ScrollFrame); note.Size = UDim2.new(1, 0, 0, 40); note.BackgroundTransparency = 1; note.Text = "ملاحظة: أدوات الحركة (السرعة والنط) مش بتاثر علي جمع Brainrots أو Rebirth. و لو لاحظت السرعة مو بتطبق جرب on/offمن جديد"; note.Font = Enum.Font.SourceSansItalic; note.TextSize = 12; note.TextColor3 = Color3.fromRGB(150, 150, 150); note.TextWrapped = true
 
-
 createActionButton(ScrollFrame, "Remove Lava (حقيقي) ", function()
-    
-
-local player = game.Players.LocalPlayer
-local char = player.Character or player.CharacterAdded:Wait()
-local humanoid = char:WaitForChild("Humanoid")
-
-local god = false
-local healthConn
-local lavaConn
-
-
-local function isLava(obj)
-    if obj.Name then
-        return string.find(string.lower(obj.Name), "lava") ~= nil
-    end
-    return false
-end
-
-local function removeLava(obj)
-    pcall(function()
-        obj:Destroy()
-    end)
-end
-
-local function scanAndRemoveLava()
-    for _,v in pairs(workspace:GetDescendants()) do
-        if isLava(v) then
-            removeLava(v)
-        end
-    end
-end
-
-local function setup(c)
-    char = c
-    humanoid = c:WaitForChild("Humanoid")
-    if god then
-        startGod()
-    end
-end
-
-function startGod()
-    if healthConn then healthConn:Disconnect() end
-
-    
-    healthConn = humanoid.HealthChanged:Connect(function()
-        if humanoid.Health <= 0 then
-            humanoid.Health = 0
-            humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
-        end
-    end)
-
-    
-    scanAndRemoveLava()
-
-    
-    lavaConn = workspace.DescendantAdded:Connect(function(v)
-        if isLava(v) then
-            removeLava(v)
-        end
-    end)
-end
-
-function stopGod()
-    if healthConn then
-        healthConn:Disconnect()
-        healthConn = nil
-    end
-    if lavaConn then
-        lavaConn:Disconnect()
-        lavaConn = nil
-    end
-end
-
-player.CharacterAdded:Connect(function(c)
-    wait(1)
-    setup(c)
-end)
-
-
-local gui = Instance.new("ScreenGui")
-gui.Name = "GodRemoveLavaMatrix"
-gui.Parent = game.CoreGui
-
-local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.fromScale(0.4,0.22)
-frame.Position = UDim2.fromScale(0.3,0.4)
-frame.BackgroundColor3 = Color3.fromRGB(5,10,5)
-frame.Active = true
-frame.Draggable = true
-
-local frameStroke = Instance.new("UIStroke", frame)
-frameStroke.Color = Color3.fromRGB(0,255,70)
-frameStroke.Thickness = 2
-
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1,0,0,40)
-title.Position = UDim2.new(0,0,0,0)
-title.Text = "SCRIPT FARES" 
-title.Font = Enum.Font.Code
-title.TextSize = 18
-title.TextColor3 = Color3.fromRGB(0,255,70)
-title.BackgroundTransparency = 1
-
-local btn = Instance.new("TextButton", frame)
-btn.Size = UDim2.fromScale(0.9,0.6)
-btn.Position = UDim2.fromScale(0.05,0.2)
-btn.TextScaled = true
-btn.Text = "NO LAVA by Fares : OFF"
-btn.BackgroundColor3 = Color3.fromRGB(0,50,0)
-btn.TextColor3 = Color3.fromRGB(0,255,70)
-
-local btnStroke = Instance.new("UIStroke", btn)
-btnStroke.Color = Color3.fromRGB(0,255,120)
-btnStroke.Thickness = 1.5
-
-btn.MouseButton1Click:Connect(function()
-    god = not god
-    if god then
-        btn.Text = "NO LAVA by Fares : ON"
-        btn.BackgroundColor3 = Color3.fromRGB(0,100,0)
-        startGod()
-    else
-        btn.Text = "NO LAVA by Fares : OFF"
-        btn.BackgroundColor3 = Color3.fromRGB(0,50,0)
-        stopGod()
-    end
-end)
+    local player = game.Players.LocalPlayer
+    local char = player.Character or player.CharacterAdded:Wait()
+    local humanoid = char:WaitForChild("Humanoid")
+    local god = false
+    local healthConn
+    local lavaConn
+    local function isLava(obj) if obj.Name then return string.find(string.lower(obj.Name), "lava") ~= nil end return false end
+    local function removeLava(obj) pcall(function() obj:Destroy() end) end
+    local function scanAndRemoveLava() for _,v in pairs(workspace:GetDescendants()) do if isLava(v) then removeLava(v) end end end
+    local function setup(c) char = c; humanoid = c:WaitForChild("Humanoid"); if god then startGod() end end
+    function startGod() if healthConn then healthConn:Disconnect() end; healthConn = humanoid.HealthChanged:Connect(function() if humanoid.Health <= 0 then humanoid.Health = 0; humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false) end end); scanAndRemoveLava(); lavaConn = workspace.DescendantAdded:Connect(function(v) if isLava(v) then removeLava(v) end end) end
+    function stopGod() if healthConn then healthConn:Disconnect(); healthConn = nil end; if lavaConn then lavaConn:Disconnect(); lavaConn = nil end end
+    player.CharacterAdded:Connect(function(c) wait(1); setup(c) end)
+    local gui = Instance.new("ScreenGui"); gui.Name = "GodRemoveLavaMatrix"; gui.Parent = game.CoreGui
+    local frame = Instance.new("Frame", gui); frame.Size = UDim2.fromScale(0.4,0.22); frame.Position = UDim2.fromScale(0.3,0.4); frame.BackgroundColor3 = Color3.fromRGB(5,10,5); frame.Active = true; frame.Draggable = true
+    local frameStroke = Instance.new("UIStroke", frame); frameStroke.Color = Color3.fromRGB(0,255,70); frameStroke.Thickness = 2
+    local title = Instance.new("TextLabel", frame); title.Size = UDim2.new(1,0,0,40); title.Position = UDim2.new(0,0,0,0); title.Text = "SCRIPT FARES"; title.Font = Enum.Font.Code; title.TextSize = 18; title.TextColor3 = Color3.fromRGB(0,255,70); title.BackgroundTransparency = 1
+    local btn = Instance.new("TextButton", frame); btn.Size = UDim2.fromScale(0.9,0.6); btn.Position = UDim2.fromScale(0.05,0.2); btn.TextScaled = true; btn.Text = "NO LAVA by Fares : OFF"; btn.BackgroundColor3 = Color3.fromRGB(0,50,0); btn.TextColor3 = Color3.fromRGB(0,255,70)
+    local btnStroke = Instance.new("UIStroke", btn); btnStroke.Color = Color3.fromRGB(0,255,120); btnStroke.Thickness = 1.5
+    btn.MouseButton1Click:Connect(function() god = not god; if god then btn.Text = "NO LAVA by Fares : ON"; btn.BackgroundColor3 = Color3.fromRGB(0,100,0); startGod() else btn.Text = "NO LAVA by Fares : OFF"; btn.BackgroundColor3 = Color3.fromRGB(0,50,0); stopGod() end end)
 end)
 
 createActionButton(ScrollFrame, "Fly", function()
@@ -344,7 +261,6 @@ end)
 
 local autoRebirthActive = false
 local autoBuySpeedActive = false
-
 
 createSection("Base Management").Parent = ScrollFrame
 local autoFarmTeleportActive = false
@@ -368,7 +284,6 @@ end)
 createActionButton(ScrollFrame, "Upgrade base", function()
     ReplicatedStorage.Events.Upgrade:InvokeServer()
 end)
-
 
 createToggle(ScrollFrame, "Auto Collect", function(state)
     autoFarmTeleportActive = state
@@ -395,7 +310,6 @@ createToggle(ScrollFrame, "Auto Collect", function(state)
         end)
     end
 end)
-
 
 createToggle(ScrollFrame, "Auto Upgrade", function(state)
     autoUpgradeRemoteActive = state
@@ -440,177 +354,133 @@ createToggle(ScrollFrame, "Auto Buy Speed", function(state)
 end)
 
 
-createSection("AUTOget Section").Parent = ScrollFrame
-local celestialHunterActive = false; local celestialWatcherConn
-createActionButton(ScrollFrame, "TP to Celestial", function()
-    local celestialFolder = workspace.GameFolder.Brainrots:FindFirstChild("Celestial")
-    if celestialFolder and #celestialFolder:GetChildren() > 0 then
-        local obj = celestialFolder:GetChildren()[1]
-        local root = obj:FindFirstChildWhichIsA("BasePart") or obj.PrimaryPart
-        if root and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            LocalPlayer.Character.HumanoidRootPart.CFrame = root.CFrame * CFrame.new(0, 5, 0)
+
+local function createAutoGetToggle(parent, sectionTitle, folderName, collectLimit)
+    createSection(sectionTitle).Parent = parent
+    
+    createActionButton(parent, "TP to " .. folderName, function()
+        local itemFolder = workspace.GameFolder.Brainrots:FindFirstChild(folderName)
+        if itemFolder and #itemFolder:GetChildren() > 0 then
+            local obj = itemFolder:GetChildren()[1]
+            local root = obj:FindFirstChildWhichIsA("BasePart") or obj.PrimaryPart
+            if root and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                LocalPlayer.Character.HumanoidRootPart.CFrame = root.CFrame * CFrame.new(0, 5, 0)
+            end
         end
-    end
-end)
-createToggle(ScrollFrame, "Auto Get Celestial", function(state)
-    celestialHunterActive = state
-    if celestialHunterActive then
-        local celestialFolder = workspace.GameFolder.Brainrots:FindFirstChild("Celestial")
-        if not celestialFolder then return end
+    end)
 
-        local function hunt(celestial)
-            if not celestialHunterActive or not celestial.Parent then return end
+    local hunterActive = false
+    local hunterCoroutine
+    local connections = {}
+    local homePosition = CFrame.new(-33.83, 4.26, -45.00) 
 
-            local rootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if not rootPart then return end
 
-            local originalCFrame = rootPart.CFrame
-            local targetPart = celestial:FindFirstChildWhichIsA("BasePart") or celestial.PrimaryPart
-            if not targetPart then return end
+    
 
-            rootPart.CFrame = targetPart.CFrame * CFrame.new(0, 5, 0)
-            task.wait(0.1)
+    local function startHunter()
+        if hunterCoroutine then task.cancel(hunterCoroutine) end
+        for _, conn in ipairs(connections) do conn:Disconnect() end
+        connections = {}
 
-            local prompt = celestial:FindFirstChildWhichIsA("ProximityPrompt", true)
-            if prompt then
-                holdE(prompt.HoldDuration or 1.5)
+        hunterCoroutine = task.spawn(function()
+            local itemFolder = workspace.GameFolder.Brainrots:FindFirstChild(folderName)
+            if not itemFolder then return end
+
+            local taskQueue = {}
+            local collectedCount = 0
+
+            local function addTask(item)
+                if not table.find(taskQueue, item) then
+                    table.insert(taskQueue, item)
+                end
             end
 
-            for i = 1, 20 do
-                if not celestial.Parent then break end
-                task.wait(0.1)
+            local childAddedConn = itemFolder.ChildAdded:Connect(addTask)
+            table.insert(connections, childAddedConn)
+
+            while hunterActive do
+                collectedCount = 0
+                notify("Auto Get", "بدء التجميع جديدة لـ " .. folderName, 3)
+
+                while collectedCount < collectLimit and hunterActive do
+                    for _, item in ipairs(itemFolder:GetChildren()) do
+                        addTask(item)
+                    end
+
+                    if #taskQueue == 0 then
+                        task.wait(1)
+                    else
+                        local item = table.remove(taskQueue, 1)
+
+                        if item and item.Parent then
+                            local rootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                            if rootPart then
+
+                                
+                                rootPart.CFrame = homePosition
+                                task.wait(0.1)
+
+                                local targetPart = item:FindFirstChildWhichIsA("BasePart") or item.PrimaryPart
+                                
+                                if targetPart then
+                                    local success = false
+                                    for attempt = 1, 3 do
+                                        if not item.Parent then success = true; break end
+                                        rootPart.CFrame = targetPart.CFrame * CFrame.new(0, 3, 0)
+                                        local prompt = item:FindFirstChildWhichIsA("ProximityPrompt", true)
+                                        if prompt then pcall(function() fireproximityprompt(prompt) end) end
+                                        task.wait(0.3)
+                                    end
+
+                                    if item.Parent == nil then success = true end
+                                    if success then collectedCount = collectedCount + 1 end
+                                    
+
+                                    
+                                    rootPart.CFrame = homePosition
+                                end
+                            end
+                        end
+                    end
+                end
+                
+                if hunterActive then
+                    notify("Auto Get", "اكتملت!، سيتم البدء من جديد بعد 1 ثانيه.", 4)
+                    task.wait(1)
+                end
             end
-
-            task.wait(0.2)
-            rootPart.CFrame = originalCFrame
-        end
-
-        celestialWatcherConn = celestialFolder.ChildAdded:Connect(hunt)
-
-        for _, celestial in ipairs(celestialFolder:GetChildren()) do
-            task.spawn(hunt, celestial)
-        end
-
-    elseif celestialWatcherConn then
-        celestialWatcherConn:Disconnect()
-        celestialWatcherConn = nil
+            
+            childAddedConn:Disconnect()
+        end)
     end
-end)
 
-
-createActionButton(ScrollFrame, "TP to Secret", function()
-    local secretFolder = workspace.GameFolder.Brainrots:FindFirstChild("Secret")
-    if secretFolder and #secretFolder:GetChildren() > 0 then
-        local obj = secretFolder:GetChildren()[1]
-        local root = obj:FindFirstChildWhichIsA("BasePart") or obj.PrimaryPart
-        if root and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            LocalPlayer.Character.HumanoidRootPart.CFrame = root.CFrame * CFrame.new(0, 5, 0)
+    createToggle(parent, "Auto Get " .. folderName, function(state, button)
+        hunterActive = state
+        if hunterActive then
+            notify("Auto Get", "تم تفعيل الجمع لـ " .. folderName, 3)
+            startHunter()
+            
+            local charAddedConn = LocalPlayer.CharacterAdded:Connect(function()
+                task.wait(3)
+                if hunterActive then
+                    notify("Auto Get", "إعادة تشغيل الجمع بعد الموت", 3)
+                    startHunter()
+                end
+            end)
+            table.insert(connections, charAddedConn)
+        else
+            if hunterCoroutine then task.cancel(hunterCoroutine); hunterCoroutine = nil end
+            for _, conn in ipairs(connections) do conn:Disconnect() end
+            connections = {}
+            notify("Auto Get", "تم إيقاف الجمع لـ " .. folderName, 3)
         end
-    end
-end)
-local secretHunterActive = false
-local secretWatcherConn
-
-createToggle(ScrollFrame, "Auto Get Secret", function(state)
-    secretHunterActive = state
-    if secretHunterActive then
-        local secretFolder = workspace.GameFolder.Brainrots:FindFirstChild("Secret")
-        if not secretFolder then return end
-
-        local function hunt(secret)
-            if not secretHunterActive or not secret.Parent then return end
-
-            local rootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if not rootPart then return end
-
-            local originalCFrame = rootPart.CFrame
-            local targetPart = secret:FindFirstChildWhichIsA("BasePart") or secret.PrimaryPart
-            if not targetPart then return end
-
-            rootPart.CFrame = targetPart.CFrame * CFrame.new(0, 5, 0)
-            task.wait(0.1)
-
- local prompt = secret:FindFirstChildWhichIsA("ProximityPrompt", true)
-if prompt then
-    holdE(prompt.HoldDuration or 1.5)
+    end)
 end
 
-            task.wait(0.2)
-            rootPart.CFrame = originalCFrame
-        end
+createAutoGetToggle(ScrollFrame, "Celestial Section", "Celestial", 1)
+createAutoGetToggle(ScrollFrame, "Secret Section", "Secret", 3)
+createAutoGetToggle(ScrollFrame, "Godly Section", "Godly", 1)
 
-        secretWatcherConn = secretFolder.ChildAdded:Connect(hunt)
-
-        for _, secret in ipairs(secretFolder:GetChildren()) do
-            task.spawn(hunt, secret)
-        end
-
-    elseif secretWatcherConn then
-        secretWatcherConn:Disconnect()
-        secretWatcherConn = nil
-    end
-end)
-
-createSection("Godly Section").Parent = ScrollFrame
-
-createActionButton(ScrollFrame, "TP to Godly", function()
-    local godlyFolder = workspace.GameFolder.Brainrots:FindFirstChild("Godly")
-    if godlyFolder and #godlyFolder:GetChildren() > 0 then
-        local obj = godlyFolder:GetChildren()[1]
-        local root = obj:FindFirstChildWhichIsA("BasePart") or obj.PrimaryPart
-        if root and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            LocalPlayer.Character.HumanoidRootPart.CFrame = root.CFrame * CFrame.new(0, 5, 0)
-        end
-    end
-end)
-
-local godlyHunterActive = false
-local godlyWatcherConn
-
-createToggle(ScrollFrame, "Auto Get Godly", function(state)
-    godlyHunterActive = state
-    if godlyHunterActive then
-        local godlyFolder = workspace.GameFolder.Brainrots:FindFirstChild("Godly")
-        if not godlyFolder then return end
-
-        local function hunt(godly)
-            if not godlyHunterActive or not godly.Parent then return end
-
-            local rootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if not rootPart then return end
-
-            local originalCFrame = rootPart.CFrame
-            local targetPart = godly:FindFirstChildWhichIsA("BasePart") or godly.PrimaryPart
-            if not targetPart then return end
-
-            rootPart.CFrame = targetPart.CFrame * CFrame.new(0, 5, 0)
-            task.wait(0.1)
-
-            local prompt = godly:FindFirstChildWhichIsA("ProximityPrompt", true)
-            if prompt then
-                holdE(prompt.HoldDuration or 1.5)
-            end
-
-            for i = 1, 20 do
-                if not godly.Parent then break end
-                task.wait(0.1)
-            end
-
-            task.wait(0.2)
-            rootPart.CFrame = originalCFrame
-        end
-
-        godlyWatcherConn = godlyFolder.ChildAdded:Connect(hunt)
-
-        for _, godly in ipairs(godlyFolder:GetChildren()) do
-            task.spawn(hunt, godly)
-        end
-
-    elseif godlyWatcherConn then
-        godlyWatcherConn:Disconnect()
-        godlyWatcherConn = nil
-    end
-end)
 
 
 task.wait(0.5)
