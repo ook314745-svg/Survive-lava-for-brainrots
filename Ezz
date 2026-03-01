@@ -6,7 +6,7 @@ local LocalPlayer = Players.LocalPlayer
 
 
 local MainGui = Instance.new("ScreenGui")
-MainGui.Name = "Fares_Chimera_v7"
+MainGui.Name = "Fares_Chimera_Cheese"
 MainGui.ResetOnSpawn = false
 MainGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
@@ -29,7 +29,7 @@ Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 10)
 local Title = Instance.new("TextLabel", Header)
 Title.Size = UDim2.new(1, 0, 1, 0)
 Title.BackgroundTransparency = 1
-Title.Text = " SurviveLava For Brainrots | By Faresv4"
+Title.Text = " SurviveLava For Brainrots | By FaresV5"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 9.2
 Title.TextColor3 = Color3.new(1, 1, 1)
@@ -91,14 +91,14 @@ local function notify(title, text, duration)
     pcall(function() notifFrame:Destroy() end)
 end
 
-local function createSection(title)
+local function createSection(title, color)
     local label = Instance.new("TextLabel", ScrollFrame)
     label.Size = UDim2.new(1, 0, 0, 25)
     label.BackgroundTransparency = 1
     label.Text = "— " .. title .. " —"
     label.Font = Enum.Font.GothamBold
     label.TextSize = 16
-    label.TextColor3 = Color3.fromRGB(0, 120, 255)
+    label.TextColor3 = color or Color3.fromRGB(0, 120, 255)
     return label
 end
 
@@ -354,6 +354,37 @@ createToggle(ScrollFrame, "Auto Buy Speed", function(state)
 end)
 
 
+createSection("Cheese Section", Color3.fromRGB(255, 196, 0)).Parent = ScrollFrame
+
+local autoCheeseActive = false
+createToggle(ScrollFrame, "Auto Cheese", function(state)
+    autoCheeseActive = state
+    if autoCheeseActive then
+        notify("Auto Cheese", "تم تفعيل جمع الجبن", 3)
+        task.spawn(function()
+            while autoCheeseActive do
+                local cheeseFolder = workspace.GameFolder:FindFirstChild("CheeseFolder")
+                if cheeseFolder then
+                    local rootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if rootPart then
+                        for _, cheeseModel in ipairs(cheeseFolder:GetChildren()) do
+                            if not autoCheeseActive then break end
+                            if cheeseModel.Name == "CheeseModel" and cheeseModel.PrimaryPart then
+                                rootPart.CFrame = cheeseModel.PrimaryPart.CFrame * CFrame.new(0, 3, 0)
+                                task.wait(0.7) 
+                            end
+                        end
+                    end
+                end
+                task.wait(0.5) 
+            end
+        end)
+    else
+        notify("Auto Cheese", "تم إيقاف جمع الجبن", 3)
+    end
+end)
+
+
 
 local function createAutoGetToggle(parent, sectionTitle, folderName, collectLimit)
     createSection(sectionTitle).Parent = parent
@@ -485,3 +516,5 @@ createAutoGetToggle(ScrollFrame, "Godly Section", "Godly", 1)
 
 task.wait(0.5)
 ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 20)
+
+-- ترجمت ال notify عشان مبفهمش انجلش😂
