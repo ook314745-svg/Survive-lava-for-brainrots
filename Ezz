@@ -29,7 +29,7 @@ Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 10)
 local Title = Instance.new("TextLabel", Header)
 Title.Size = UDim2.new(1, 0, 1, 0)
 Title.BackgroundTransparency = 1
-Title.Text = " SurviveLava For Brainrots | By FaresV5"
+Title.Text = " SurviveLava For Brainrots | By FaresV6"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 9.2
 Title.TextColor3 = Color3.new(1, 1, 1)
@@ -255,8 +255,8 @@ createActionButton(ScrollFrame, "Remove Lava (حقيقي) ", function()
     btn.MouseButton1Click:Connect(function() god = not god; if god then btn.Text = "NO LAVA by Fares : ON"; btn.BackgroundColor3 = Color3.fromRGB(0,100,0); startGod() else btn.Text = "NO LAVA by Fares : OFF"; btn.BackgroundColor3 = Color3.fromRGB(0,50,0); stopGod() end end)
 end)
 
-createActionButton(ScrollFrame, "Fly", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/ook314745-svg/fly/refs/heads/main/fly"))()
+createActionButton(ScrollFrame, "FlyV2", function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/ook314745-svg/flyscript/refs/heads/main/ui"))()
 end)
 
 local autoRebirthActive = false
@@ -383,6 +383,46 @@ createToggle(ScrollFrame, "Auto Cheese", function(state)
         notify("Auto Cheese", "تم إيقاف جمع الجبن", 3)
     end
 end)
+
+
+
+createSection("Coin Farm", Color3.fromRGB(255, 215, 0)).Parent = ScrollFrame
+
+local autoCoinActive = false
+createToggle(ScrollFrame, "Auto Coin", function(state)
+    autoCoinActive = state
+    if autoCoinActive then
+        notify("Auto Coin", "تم تفعيل جمع العملات", 3)
+        task.spawn(function()
+            while autoCoinActive do
+                local rootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if not rootPart then 
+                    task.wait(1) 
+                else
+                    for _, coinModel in ipairs(workspace:GetChildren()) do
+                        if not autoCoinActive then break end
+                        
+                       
+                        if coinModel.Name == "Coin" and coinModel:IsA("Model") then
+                            
+                            local coinPart = coinModel:FindFirstChild("Part")
+                            if coinPart and coinPart:IsA("BasePart") then
+                                pcall(function()
+                                    rootPart.CFrame = coinPart.CFrame * CFrame.new(0, 3, 0)
+                                end)
+                                task.wait(0.1) 
+                            end
+                        end
+                    end
+                end
+                task.wait(0.5) 
+            end
+        end)
+    else
+        notify("Auto Coin", "تم إيقاف جمع العملات", 3)
+    end
+end)
+
 
 
 
