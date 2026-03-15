@@ -29,7 +29,7 @@ Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 10)
 local Title = Instance.new("TextLabel", Header)
 Title.Size = UDim2.new(1, 0, 1, 0)
 Title.BackgroundTransparency = 1
-Title.Text = " SurviveLava For Brainrots | By FaresV6"
+Title.Text = " SurviveLava For Brainrots | By FaresV8"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 9.2
 Title.TextColor3 = Color3.new(1, 1, 1)
@@ -423,7 +423,167 @@ createToggle(ScrollFrame, "Auto Coin", function(state)
     end
 end)
 
+createSection("Gold Brainrot Farm", Color3.fromRGB(255, 215, 0)).Parent = ScrollFrame
 
+local autoGoldBrainrotActive = false
+local homePosition = CFrame.new(-33.83, 4.26, -45.00) 
+
+createToggle(ScrollFrame, "Auto Brainrots Gold", function(state)
+    autoGoldBrainrotActive = state
+    if autoGoldBrainrotActive then
+        notify("Auto Gold", "تم تفعيل البحث عن الذهبيات", 3)
+        task.spawn(function()
+            local rarities = { "Celestial", "Common", "Epic", "Godly", "Legendary", "Mythic", "Rare", "Secret" }
+            
+            local function containsGold(brainrot)
+                for _, obj in ipairs(brainrot:GetDescendants()) do
+                    if string.find(string.lower(obj.Name), "gold") then return true end
+                    if (obj:IsA("TextLabel") or obj:IsA("TextButton")) and string.find(string.lower(obj.Text), "gold") then return true end
+                end
+                return false
+            end
+
+            while autoGoldBrainrotActive do
+                local char = LocalPlayer.Character
+                local rootPart = char and char:FindFirstChild("HumanoidRootPart")
+                if not rootPart then
+                    task.wait(1)
+                else
+                    local brainrotsFolder = workspace:FindFirstChild("GameFolder") and workspace.GameFolder:FindFirstChild("Brainrots")
+                    if not brainrotsFolder then
+                        task.wait(1)
+                    else
+                        local collectedSomething = false
+                        for _, rarity in ipairs(rarities) do
+                            if not autoGoldBrainrotActive then break end
+                            local folder = brainrotsFolder:FindFirstChild(rarity)
+                            if folder then
+                                for _, brainrot in ipairs(folder:GetChildren()) do
+                                    if not autoGoldBrainrotActive then break end
+                                    local brRoot = brainrot:FindFirstChild("RootPart")
+                                    if brRoot and containsGold(brainrot) then
+                                        pcall(function()
+                                            rootPart.CFrame = brRoot.CFrame * CFrame.new(0, 3, 0)
+                                            task.wait(1)
+                                            local prompt = brRoot:FindFirstChildOfClass("ProximityPrompt")
+                                            if prompt then
+                                                fireproximityprompt(prompt)
+                                                collectedSomething = true
+                                                task.wait(1) 
+                                                rootPart.CFrame = homePosition
+                                                task.wait(1)
+                                            end
+                                        end)
+                                    end
+                                end
+                            end
+                        end
+                        if not collectedSomething then
+                            task.wait(1) 
+                        end
+                    end
+                end
+            end
+        end)
+    else
+        notify("Auto Gold", "تم إيقاف البحث عن الذهبيات", 3)
+    end
+end)
+
+
+createSection("RebirthBrainrotFarm", Color3.fromRGB(255, 100, 100)).Parent = ScrollFrame
+
+local autoRebirthBrainrotActive = false
+createToggle(ScrollFrame, "AutoRebirthBrainrots", function(state)
+    autoRebirthBrainrotActive = state
+    if autoRebirthBrainrotActive then
+        notify("Auto Rebirth BR", "تم تفعيل جمع متطلبات الريبيرث", 3)
+        task.spawn(function()
+            local rarities = { "Celestial", "Common", "Epic", "Godly", "Legendary", "Mythic", "Rare", "Secret" }
+
+            local function normalize(text)
+                if not text then return "" end
+                return string.gsub(string.lower(text), "%s+", "")
+            end
+
+            local function getRequiredBrainrot()
+                local rebirthRewardGui = LocalPlayer.PlayerGui:FindFirstChild("HUD", true)
+                if rebirthRewardGui then
+                    rebirthRewardGui = rebirthRewardGui:FindFirstChild("Rebirth", true)
+                    if rebirthRewardGui then
+                        rebirthRewardGui = rebirthRewardGui:FindFirstChild("InsiderFrame", true)
+                        if rebirthRewardGui then
+                            rebirthRewardGui = rebirthRewardGui:FindFirstChild("Insider", true)
+                            if rebirthRewardGui then
+                                rebirthRewardGui = rebirthRewardGui:FindFirstChild("Brainrots", true)
+                                if rebirthRewardGui then
+                                    rebirthRewardGui = rebirthRewardGui:FindFirstChild("RebirthReward", true)
+                                    if rebirthRewardGui then
+                                        for _, v in ipairs(rebirthRewardGui:GetDescendants()) do
+                                            if v:IsA("TextLabel") and v.Text ~= "" then
+                                                return v.Text
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+                return nil
+            end
+
+            local function findBrainrot(targetName)
+                local target = normalize(targetName)
+                local brainrotFolders = workspace.GameFolder:FindFirstChild("Brainrots", true)
+                if not brainrotFolders then return nil end
+
+                for _, rarity in ipairs(rarities) do
+                    local folder = brainrotFolders:FindFirstChild(rarity)
+                    if folder then
+                        for _, brainrot in ipairs(folder:GetChildren()) do
+                            local name = normalize(brainrot.Name)
+                            if string.find(name, target) or string.find(target, name) then
+                                return brainrot
+                            end
+                        end
+                    end
+                end
+                return nil
+            end
+
+            while autoRebirthBrainrotActive do
+                local char = LocalPlayer.Character
+                local rootPart = char and char:FindFirstChild("HumanoidRootPart")
+                local requiredName = getRequiredBrainrot()
+
+                if rootPart and requiredName then
+                    local brainrotToCollect = findBrainrot(requiredName)
+                    if brainrotToCollect then
+                        notify("Auto Rebirth BR", "تم العثور على: " .. brainrotToCollect.Name, 2)
+                        local brRoot = brainrotToCollect:FindFirstChild("RootPart")
+                        if brRoot then
+                            pcall(function()
+                                rootPart.CFrame = brRoot.CFrame * CFrame.new(0, 3, 0)
+                                task.wait(0.25)
+                                local prompt = brRoot:FindFirstChildOfClass("ProximityPrompt")
+                                if prompt then
+                                    fireproximityprompt(prompt)
+                                    task.wait(0.3)
+                                    
+                                    rootPart.CFrame = homePosition
+                                end
+                            end)
+                        end
+                    end
+                end
+                task.wait(1.5) 
+            end
+        end)
+    else
+        notify("Auto Rebirth BR", "تم إيقاف جمع متطلبات الريبيرث", 3)
+    end
+end)
 
 
 local function createAutoGetToggle(parent, sectionTitle, folderName, collectLimit)
@@ -443,11 +603,7 @@ local function createAutoGetToggle(parent, sectionTitle, folderName, collectLimi
     local hunterActive = false
     local hunterCoroutine
     local connections = {}
-    local homePosition = CFrame.new(-33.83, 4.26, -45.00) 
-
-
     
-
     local function startHunter()
         if hunterCoroutine then task.cancel(hunterCoroutine) end
         for _, conn in ipairs(connections) do conn:Disconnect() end
@@ -486,7 +642,6 @@ local function createAutoGetToggle(parent, sectionTitle, folderName, collectLimi
                         if item and item.Parent then
                             local rootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
                             if rootPart then
-
                                 
                                 rootPart.CFrame = homePosition
                                 task.wait(0.1)
@@ -505,8 +660,6 @@ local function createAutoGetToggle(parent, sectionTitle, folderName, collectLimi
 
                                     if item.Parent == nil then success = true end
                                     if success then collectedCount = collectedCount + 1 end
-                                    
-
                                     
                                     rootPart.CFrame = homePosition
                                 end
