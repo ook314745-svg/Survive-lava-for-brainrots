@@ -29,7 +29,7 @@ Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 10)
 local Title = Instance.new("TextLabel", Header)
 Title.Size = UDim2.new(1, 0, 1, 0)
 Title.BackgroundTransparency = 1
-Title.Text = " SurviveLava For Brainrots | By FaresV9"
+Title.Text = " SurviveLava For Brainrots | By FaresV10"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 9.2
 Title.TextColor3 = Color3.new(1, 1, 1)
@@ -714,6 +714,144 @@ createAutoGetToggle(ScrollFrame, "Celestial Section", "Celestial", 1)
 createAutoGetToggle(ScrollFrame, "Secret Section", "Secret", 3)
 createAutoGetToggle(ScrollFrame, "Godly Section", "Godly", 1)
 
+createToggle(ScrollFrame, "AUTO quests", function(state)
+    autoQuestActive = state
+    if autoQuestActive then
+        notify("Auto Quests", "تم التفعيل)", 3)
+
+        if questCoroutine then task.cancel(questCoroutine) end
+
+        local fullSearchKeywords = {
+            "gold","Gold","GOLD","gOld","goLd","golD","GOld","gOLd","goLD","GOLd","gOLD","GOlD",
+            "diamond","Diamond","DIAMOND","diamonD","diamonD","diamonD","diamonD","diamonD","diamonD","diamonD",
+            "emerald","Emerald","EMERALD","emeralD","emeralD","emeralD","emeralD","emeralD","emeralD","emeralD",
+            "bloodmoon","Bloodmoon","BLOODMOON","bloodmooN","bloodmooN","bloodmooN","bloodmooN","bloodmooN","bloodmooN","bloodmooN",
+            "cheese","Cheese","CHEESE","cheesE","cheesE","cheesE","cheesE","cheesE","cheesE","cheesE",
+            "rainbow","Rainbow","RAINBOW","rainboW","rainboW","rainboW","rainboW","rainboW","rainboW","rainboW"
+        }
+
+        local function findKeywordInObject(obj)
+            if not obj then return "Normal" end
+            for _, desc in ipairs(obj:GetDescendants()) do
+                if desc:IsA("TextLabel") or desc:IsA("TextButton") then
+                    local text = desc.Text
+                    for _, keyword in ipairs(fullSearchKeywords) do
+                        if string.find(text, keyword) then
+                            return keyword
+                        end
+                    end
+                end
+            end
+            return "Normal"
+        end
+
+        local brainrotFolders = {
+            "Secret","Rare","Mythic","Legendary","Godly","Epic","Common","Celestial"
+        }
+
+        questCoroutine = task.spawn(function()
+            while autoQuestActive do
+                pcall(function()
+                    local char = LocalPlayer.Character
+                    if not char or not char:FindFirstChild("HumanoidRootPart") then task.wait(1); return end
+
+
+                    local mainObject = workspace:FindFirstChild("GameFolder", true)
+                    mainObject = mainObject and mainObject:FindFirstChild("VolcanoObby", true)
+                    mainObject = mainObject and mainObject:FindFirstChild("DinoRender", true)
+                    mainObject = mainObject and mainObject:FindFirstChild("Main", true)
+
+                    local mainMutation = findKeywordInObject(mainObject)
+
+
+                    local dinoRender = workspace:FindFirstChild("GameFolder", true)
+                    dinoRender = dinoRender and dinoRender:FindFirstChild("VolcanoObby", true)
+                    dinoRender = dinoRender and dinoRender:FindFirstChild("DinoRender", true)
+
+                    local desiredBrainrotName = nil
+                    if dinoRender then
+                        for _, possible in ipairs(dinoRender:GetChildren()) do
+                            if possible:FindFirstChild("RootPart") then
+                                desiredBrainrotName = possible.Name
+                                break
+                            end
+                        end
+                    end
+
+
+                    local targetBrainrot = nil
+                    if desiredBrainrotName then
+                        local brainrotsFolder = workspace:FindFirstChild("GameFolder", true) and workspace.GameFolder:FindFirstChild("Brainrots", true)
+                        if brainrotsFolder then
+                            for _, folderName in ipairs(brainrotFolders) do
+                                local folder = brainrotsFolder:FindFirstChild(folderName)
+                                if folder then
+                                    for _, br in ipairs(folder:GetChildren()) do
+                                        if br:IsA("Model") and br.Name == desiredBrainrotName then
+                                            targetBrainrot = br
+                                            break
+                                        end
+                                    end
+                                end
+                                if targetBrainrot then break end
+                            end
+                        end
+                    end
+
+
+                    local finalMutation = "Normal"
+                    if targetBrainrot then
+                        local attHolder = targetBrainrot:FindFirstChild("RootPart", true) and targetBrainrot.RootPart:FindFirstChild("BrainrotAtt", true)
+                        finalMutation = findKeywordInObject(attHolder)
+                    end
+
+
+                    notify("Auto Quests", "في انتظار ال: " .. mainMutation, 2)
+                    if targetBrainrot and finalMutation == mainMutation then
+                        notify("Auto Quests", "! جاري التجميع...", 2)
+                        local brRoot = targetBrainrot:FindFirstChild("RootPart")
+                        if brRoot then
+                            local rootPart = char.HumanoidRootPart
+                            rootPart.CFrame = brRoot.CFrame * CFrame.new(0, 3, 0)
+                            task.wait(0.25)
+                            
+
+                            local prompt = nil
+                            for _, desc in ipairs(targetBrainrot:GetDescendants()) do
+                                if desc:IsA("ProximityPrompt") then
+                                    prompt = desc
+                                    break
+                                end
+                            end
+
+
+                            
+                            if prompt then 
+                                local oldLOS = prompt.RequiresLineOfSight
+                                prompt.RequiresLineOfSight = false
+                                fireproximityprompt(prompt)
+                                prompt.RequiresLineOfSight = oldLOS
+                            end
+                            
+                            task.wait(0.4)
+
+                            rootPart.CFrame = CFrame.new(-25.88, 4.26, -37.58)
+                            task.wait(0.4)
+                            rootPart.CFrame = CFrame.new(-298.18, 222.15, -957.07)
+
+                            task.wait(2)
+                        end
+                    else
+                        task.wait(1)
+                    end
+                end)
+            end
+        end)
+    else
+        if questCoroutine then task.cancel(questCoroutine); questCoroutine = nil end
+        notify("Auto Quests", "تم إيقاف المهام ", 3)
+    end
+end)
 
 
 task.wait(0.5)
