@@ -301,7 +301,7 @@ createToggle(ScrollFrame, "Auto Collect", function(state)
             while autoFarmTeleportActive do
                 local myPlot = getHomePlot()
                 if myPlot then
-                    for i = 1, 30 do
+                    for i = 1, 40 do
                         if not autoFarmTeleportActive then break end
                         local place = myPlot.Places:FindFirstChild(tostring(i))
                         if place and place:FindFirstChild("Claim") then
