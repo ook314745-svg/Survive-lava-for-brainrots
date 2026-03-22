@@ -325,7 +325,7 @@ createToggle(ScrollFrame, "Auto Upgrade", function(state)
     if autoUpgradeRemoteActive then
         task.spawn(function()
             while autoUpgradeRemoteActive do
-                for i = 1, 30 do
+                for i = 1, 40 do
                     if not autoUpgradeRemoteActive then break end
                     ReplicatedStorage.Events.Upgrade:InvokeServer(i)
                     task.wait(0.1)
