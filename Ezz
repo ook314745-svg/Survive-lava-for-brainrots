@@ -29,7 +29,7 @@ Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 10)
 local Title = Instance.new("TextLabel", Header)
 Title.Size = UDim2.new(1, 0, 1, 0)
 Title.BackgroundTransparency = 1
-Title.Text = " SurviveLava For Brainrots | By FaresV10"
+Title.Text = " SurviveLava For Brainrots | By FaresV11"
 Title.Font = Enum.Font.GothamBold
 Title.TextSize = 9.2
 Title.TextColor3 = Color3.new(1, 1, 1)
@@ -431,6 +431,63 @@ createToggle(ScrollFrame, "Auto Coin", function(state)
         notify("Auto Coin", "تم إيقاف جمع العملات", 3)
     end
 end)
+
+createSection("AUTO Easter Egg ", Color3.fromRGB(255, 105, 180)).Parent = ScrollFrame
+
+local autoEasterEggActive = false
+createToggle(ScrollFrame, "Auto Easter Egg", function(state)
+    autoEasterEggActive = state
+    if autoEasterEggActive then
+        notify("Auto Easter Egg", "تم تفعيل جمع Easter Eggs", 3)
+        task.spawn(function()
+            while autoEasterEggActive do
+                local rootPart = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if not rootPart then 
+                    task.wait(1) 
+                else
+
+                    
+                    for _, easterEgg in ipairs(workspace:GetChildren()) do
+                        if not autoEasterEggActive then break end
+                        
+                        if easterEgg.Name == "EasterEgg" and easterEgg:IsA("Model") then
+                            local eggPart = easterEgg:FindFirstChildWhichIsA("BasePart") or easterEgg.PrimaryPart
+                            if eggPart then
+                                pcall(function()
+                                    rootPart.CFrame = eggPart.CFrame * CFrame.new(0, 3, 0)
+                                end)
+                                task.wait(0.3) 
+                            end
+                        end
+                    end
+                    
+
+                    
+                    local gameFolder = workspace:FindFirstChild("GameFolder")
+                    if gameFolder then
+                        for _, easterEgg in ipairs(gameFolder:GetChildren()) do
+                            if not autoEasterEggActive then break end
+                            
+                            if easterEgg.Name == "EasterEgg" and easterEgg:IsA("Model") then
+                                local eggPart = easterEgg:FindFirstChildWhichIsA("BasePart") or easterEgg.PrimaryPart
+                                if eggPart then
+                                    pcall(function()
+                                        rootPart.CFrame = eggPart.CFrame * CFrame.new(0, 3, 0)
+                                    end)
+                                    task.wait(0.3) 
+                                end
+                            end
+                        end
+                    end
+                end
+                task.wait(0.5) 
+            end
+        end)
+    else
+        notify("Auto Easter Egg", "تم إيقاف جمع Easter Eggs", 3)
+    end
+end)
+
 
 createSection("Gold Brainrot Farm", Color3.fromRGB(255, 215, 0)).Parent = ScrollFrame
 
@@ -858,3 +915,4 @@ task.wait(0.5)
 ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 20)
 
 -- ترجمت ال notify عشان مبفهمش انجلش😂
+
